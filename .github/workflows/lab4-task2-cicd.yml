@@ -1,0 +1,38 @@
+name: Lab 4 Task 2 - Gated CI/CD Testing Pipeline
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'task2-cicd-automated-testing/**'
+      - '.github/workflows/lab4-task2-cicd.yml'
+
+jobs:
+  unit-tests:
+    name: Gate 1 - Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install pytest
+      - run: pytest task2-cicd-automated-testing/test_unit.py -v
+
+  integration-tests:
+    name: Gate 2 - Integration Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install pytest
+      - run: pytest task2-cicd-automated-testing/test_integration.py -v
+
+  gated-deployment:
+    name: Gate 3 - Production Deployment
+    needs: [unit-tests, integration-tests]
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "[GATE PASSED] All Unit & Integration tests succeeded. Deploying build..."
